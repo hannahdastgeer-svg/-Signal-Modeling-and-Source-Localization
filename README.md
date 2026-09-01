@@ -83,13 +83,32 @@ title('Estimated L vs True L');
 grid on;
 <img width="1129" height="746" alt="Figure_5" src="https://github.com/user-attachments/assets/05df8edb-e26d-4371-84d6-23bf84002af1" />
 
-%Generate two independent random vectors of unit-variance Gaussian noise wi and w2 using randn.
-%Continue generating signals only for t e [0,0.5] and L = 100.
-t = 0:(1/fs):0.5;
-w1 = randn(t); w2 = randn(t);
+%Use linspace to generate 10 a values between 10 and 150. For each value of a, generate N = 100 noisy received signals and produce 100 estimates L1(a), L2(a),..., LN(a). Then compute the average squared error
+[y1, y2] = lab1sim(A, B, L, s);
+a = 10;
+z1 = @(t)y1(t)+a*randn(1,length(t));
+z2 = @(t)y2(t)+a*randn(1,length(t));
+alphas = linspace(10, 150, 10);
+errors = zeros(1,length(alphas));
+for a = (1:length(alphas))
+ total = 0;
+ for i = 1:100 %100 here is N
+z1 = @(t)y1(t)+alphas(a)*randn(1,length(t));
+z2 = @(t)y2(t)+alphas(a)*randn(1,length(t));
+[angles, Ls] = lab1est(0.5, 100, z1, z2);
+total = total + (Ls-100)^2; %the 100 here is L
+ end
+ errors(a) = total/100; %100 here is N
+end
+figure;
+%Plot average squared error as a function of alpha
+plot(alphas, errors, 'o-');
+xlabel('Alpha Values');
+ylabel('Average Squared Error');
+title('Average Squared Error vs Alpha');
+grid on;
+<img width="1142" height="746" alt="Figure_6" src="https://github.com/user-attachments/assets/8b8daca9-7c34-461e-909d-8e90a90c9eb6" />
 
-alpha = linspace(10,150,10);
-noisy_signal = zeros(1, length(alpha));
 
 for n = 1:length(alpha)
     [noisy1,noisy2] = lab1sim(0.5,100,100,@(n) 1000 * cos(880*pi*n) .* heaviside(n));
