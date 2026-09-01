@@ -1,0 +1,11 @@
+function [angle,L] = lab1est(A,B,y1,y2)
+  fs = 44.1e3;
+  t = 0:(1/fs):0.5;
+  y1sig = y1(t);
+  y2sig = y2(t);
+  [C, lags] = xcorr(y1sig, y2sig);
+  [~, peakIndex] = max(C);
+  relativeTimeShift = lags(peakIndex) / fs;
+  angle = asin(relativeTimeShift*(333+1/3)/A);
+  L = tan(angle)*B;
+end
